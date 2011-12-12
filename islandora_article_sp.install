@@ -1,0 +1,14 @@
+<?php
+
+function islandora_article_sp_install() {
+  /* load forms */
+  module_load_include('inc','fedora_repository','fedora_repository.solutionpacks');
+  $path = drupal_get_path('module','islandora_article_sp');
+  solution_pack_add_form('Islandora Article MODS Form',"$path/xml/mods-article.xml");
+  solution_pack_add_form_association('islandora:articleCModel','Islandora Article MODS Form');
+}
+
+function islandora_article_sp_uninstall() {
+  /* remove form and form associations */
+  /* purge objects, if possible? */
+}

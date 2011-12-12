@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * return @objects array
+ */
+function islandora_article_sp_required_fedora_objects() {
+
+  $module_path = drupal_get_path('module','islandora_article_sp');
+  
+  return array(
+    'islandora_article_sp' => array(
+      'module' => 'islandora_article_sp',
+      'title' => 'Islandora Article Solution Pack',
+      'objects' => array(
+        array(
+          'pid' => 'islandora:articleCModel',
+          'dsid' => 'ISLANDORACM',
+          'label' => 'Islandora Article Content Model',
+          'cmodel' => 'fedora-system:ContentModel-3.0',
+          'datastream_file' => "$module_path/xml/ARTICLE_SP_CMODEL.xml",
+        ),
+        array(
+          'pid' => 'islandora:articleCollection',
+          'label' => 'Islandora Article Collection',
+          'cmodel' => 'islandora:collectionCModel',
+          'parent' => 'islandora:root',
+          'datastreams' => array(
+            array(
+              'dsid' => 'TN',
+              'datastream_file' => "$module_path/images/Crystal_Clear_mimetype_document.png",
+              'mimetype' => 'image/png',
+            ),
+            array(
+              'dsid' => 'COLLECTION_POLICY',
+              'datastream_file' => "$module_path/xml/ARTICLE_COLLECTIONPOLICY.xml",
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  
+}
+
+
