@@ -20,6 +20,13 @@ function islandora_article_sp_required_fedora_objects() {
           'datastream_file' => "$module_path/xml/ARTICLE_SP_CMODEL.xml",
         ),
         array(
+          'pid' => 'islandora:authorCModel',
+          'dsid' => 'ISLANDORACM',
+          'label' => 'Islandora Author Content Model',
+          'cmodel' => 'fedora-system:ContentModel-3.0',
+          'datastream_file' => "$module_path/xml/AUTHOR_SP_CMODEL.xml",
+        ),
+        array(
           'pid' => 'islandora:articleCollection',
           'label' => 'Islandora Article Collection',
           'cmodel' => 'islandora:collectionCModel',
