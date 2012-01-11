@@ -4,7 +4,9 @@ function islandora_article_sp_install() {
   /* load forms */
   module_load_include('inc','fedora_repository','fedora_repository.solutionpacks');
   $path = drupal_get_path('module','islandora_article_sp');
-  solution_pack_add_form('Islandora Article MODS Form',"$path/xml/mods-article.xml");
+  $dom = new DOMDocument();
+  $dom->load("$path/xml/mods-article.xml");
+  solution_pack_add_form('Islandora Article MODS Form',$dom->saveXML());
   solution_pack_add_form_association('islandora:articleCModel','Islandora Article MODS Form');
 }
 
