@@ -6,16 +6,16 @@
         <type>text/xml</type>
     </mimetypes>
     <ingest_rules></ingest_rules>
-    <ingest_form dsid="MODS" page="2">
+    <ingest_form dsid="MADS" page="2">
         <form_builder_method file="" class="" method="" handler=""/>
         <form_elements></form_elements>
     </ingest_form>
     <datastreams>
         <datastream dsid="DC"></datastream>
         <datastream dsid="TN"></datastream>
-        <datastream dsid="MODS"></datastream>
+        <datastream dsid="MADS"></datastream>
     </datastreams>
     <forms>
-        <form name="" dsid="MODS" document_module="" document_file="" document_class=""></form>
+        <form name="" dsid="MADS" document_module="" document_file="" document_class=""></form>
     </forms>
 </content_model>

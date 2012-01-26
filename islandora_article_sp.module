@@ -43,10 +43,145 @@ function islandora_article_sp_required_fedora_objects() {
             ),
           ),
         ),
+         array(
+            'pid' => 'islandora:authorCollection',
+            'label' => 'Islandora Author Collection',
+            'cmodel' => 'islandora:collectionCModel',
+            'parent' => 'islandora:root',
+            'datastreams' => array(
+              array(
+                'dsid' => 'TN',
+                'datastream_file' => "$module_path/images/Crystal_Clear_mimetype_document.png",
+                'mimetype' => 'image/png',
+              ),
+              array(
+                'dsid' => 'COLLECTION_POLICY',
+                'datastream_file' => "$module_path/xml/AUTHOR_COLLECTIONPOLICY.xml",
+              ),
+            ),
+          ),
       ),
     ),
   );
   
+}
+
+function _islandora_article_mads_to_dc($xml) {
+  $doc = new DOMDocument();
+  $xsl = new XSLTProcessor();
+
+  $path = drupal_get_path('module','islandora_content_model_forms');
+  $doc->load($path .'/transforms/mads_to_dc.xsl');
+  $xsl->importStyleSheet($doc);
+
+  $doc->loadXML($xml);
+  return $xsl->transformToXML($doc);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function islandora_article_sp_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'content_model_viewer_ingest_metadata_form') {
+    if ($form_state['storage']['step'] == 2) {
+      if ($form['#collection_pid'] == 'islandora:articleCollection') {
+        $form['#submit'][] = 'islandora_article_sp_find_or_create_author';
+      }
+    }
+  }
+}
+
+function islandora_article_sp_find_or_create_author($form, &$form_state) {
+  
+  module_load_include('inc','fedora_repository','api/fedora_item');
+  watchdog('islandora_article_sp',print_r($form_state['values'],TRUE));
+  
+  $article_pid = $form_state['values']['pid'];
+  if (empty($article_pid)) {
+    return FALSE;
+  }
+  $article = new Fedora_Item($article_pid);
+  $article_mods = $article->get_datastream('MODS');    
+    
+  $i = 0;
+  
+  foreach ($form_state['values']['people'] as $person_values) {
+    $first = $person_values['given'];
+    $last = $person_values['family'];
+    $date = $person_values['date'];
+    $pid = $person_values['pid'];
+    $role = $person_values['role'][0];     
+    if ($author = Fedora_Item::find_objects_by_pattern($pid,'PID',1)) { 
+      // do nowt
+    } 
+    else {
+      // create xml
+      $mads = new DOMDocument('1.0','UTF-8');
+      
+      $root_el = $mads->createElementNS('http://www.loc.gov/mads/v2','mads');
+      $root_el->setAttribute('xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance');
+      $root_el->setAttribute('xsi:schemaLocation','http://www.loc.gov/mads/v2 http://www.loc.gov/standards/mads/mads.xsd');
+      $mads->appendChild($root_el);
+
+      $authority_el = $mads->createElement('authority');
+      $root_el->appendChild($authority_el);
+
+      $name_el = $mads->createElement('name');
+      $name_el->setAttribute('type','personal');
+      $authority_el->appendChild($name_el);
+
+      $first_el = $mads->createElement('namePart',$first);
+      $first_el->setAttribute('type','given');
+      $name_el->appendChild($first_el);
+
+      $last_el = $mads->createElement('namePart',$last);
+      $last_el->setAttribute('type','family');
+      $name_el->appendChild($last_el);
+
+      $date_el = $mads->createElement('namePart',$date);
+      $date_el->setAttribute('type','date');
+      $name_el->appendChild($date_el);
+      
+      // create new fedora item
+      $namespace = 'author';
+      $new_pid = fedora_item::get_next_PID_in_namespace($namespace);
+      $author = fedora_item::ingest_new_item($new_pid);
+      $mads_xml = $mads->saveXML();
+      $author->add_datastream_from_string($mads_xml,'MADS','MADS','text/xml','X');
+      $dc = _islandora_article_mads_to_dc($mads_xml);
+      $author->modify_datastream_by_value($dc, 'DC', 'Dublin Core', 'text/xml');
+      
+      // also need to change the value of the article's MODS datastream
+      
+      $article_doc = simplexml_load_string($article_mods);
+      $mods_name = $article_doc->name[$index];
+      $mods_name['authorityURI'] = $new_pid;
+      $article->modify_datastream_by_value($article_doc->asXML(),'MODS','MODS','text/xml','X');      
+    }
+    $i++;
+    $article->add_relationship('islandora:hasAuthor',$author);
+  }
+  
+}
+
+function islandora_article_sp_parse_array($array) {
+  
+}
+
+function islandora_article_sp_relationships($form,&$form_state) {
+  $subject_pid = $form_state['values']['pid'];
+  $subject = new Fedora_Item($pid);
+  $relationship = $value['#user_data']['islandora_authority_relationship'];
+  
+  $current_subjects = $article->get_relationships($relationship);
+  foreach($current_subjects as $current_subject) {
+    $article->purge_relationship($relationship,$current_subject);
+  }
+  foreach ($form_state['values'] as $key => $value) {
+    $object_pid = $value['pid'];
+    
+    $subject->add_relationship($rel,$object_pid);
+  }
 }
 
 

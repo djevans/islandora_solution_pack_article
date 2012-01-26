@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection_policy xmlns="http://www.islandora.ca"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.islandora.ca http://syn.lib.umanitoba.ca/collection_policy.xsd" name="">
+    <content_models>
+        <content_model name="Author" dsid="ISLANDORACM" namespace="author" pid="islandora:authorCModel"/>
+    </content_models>
+    <search_terms>
+        <term field="dc.creator">dc.creator</term>
+        <term field="mads.namePart">mads.namePart</term>
+        <term field="mads.namePart_given">mads.namePart_given</term>
+        <term field="mads.namePart_family">mads.namePart_family</term>
+        <term field="mads.namePart_date">mads.namePart_date</term>
+    </search_terms>
+    <relationship>isMemberOfCollection</relationship>
+</collection_policy>
